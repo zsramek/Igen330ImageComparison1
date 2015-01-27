@@ -9,6 +9,7 @@ using namespace std;
 using namespace cv;
 
 void compareImages (Mat& img1, Mat& img2);
+void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 
 int main()
@@ -59,7 +60,8 @@ int main()
 
     waitKey(0);
 
-    compareImages(img1Sobel, img2Sobel);
+    //compareImages(img1Sobel, img2Sobel);
+    compareGrayImages(img1Sobel, img2Sobel);
 
     imshow("Comparison", img2Sobel);
 
@@ -140,7 +142,7 @@ void compareImages (Mat& img1, Mat& img2)
     cvtColor(img2, img2Final, CV_GRAY2RGB);
     */
 
-    const int channels = img2.channels();
+    //const int channels = img2.channels();
 
     MatIterator_<Vec3b> it1, end1, it2, end2;
     for (it1 = img1.begin<Vec3b>(), end1 = img1.end<Vec3b>(), it2 = img2.begin<Vec3b>(), end2 = img2.end<Vec3b>(); it1!=end1, it2!=end2; ++it1, ++it2)
@@ -157,6 +159,23 @@ void compareImages (Mat& img1, Mat& img2)
     return;
 }
 
+void compareGrayImages(Mat& img1Gray, Mat& img2Gray)
+{
+    MatIterator_<uchar> it1, end1, it2, end2;
+    for (it1 = img1Gray.begin<uchar>(), end1 = img1Gray.end<uchar>(), it2 = img2Gray.begin<uchar>(), end2 = img2Gray.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
+    {
+        if (*it1 != *it2)
+        {
+            *it2 = 255;
+        }
+        else
+        {
+            *it2 = 0;
+        }
+    }
+
+    return;
+}
 
 
 
