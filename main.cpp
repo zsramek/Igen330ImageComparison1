@@ -53,17 +53,24 @@ int main()
     }
     while(i != 1);
 
+    ///Apply the Sobel filering to both images
     sobelImages(img1, img2, img1Sobel, img2Sobel);
 
+    ///Show the results of the sobel filtering
     imshow("Perfect", img1Sobel);
     imshow("Comparison", img2Sobel);
 
     waitKey(0);
 
-    //compareImages(img1Sobel, img2Sobel);
+    ///Compare the images without applying the filtering
+    compareImages(img1, img2);
+    ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
 
-    imshow("Comparison", img2Sobel);
+    ///Display the results
+    imshow("Comparison", img2);
+    namedWindow("Sobel Comparison", CV_WINDOW_AUTOSIZE);
+    imshow("Sobel Comparison", img2Sobel);
 
     waitKey(0);
 
@@ -166,6 +173,7 @@ void compareGrayImages(Mat& img1Gray, Mat& img2Gray)
     {
         if (*it1 != *it2)
         {
+            //cout << *it1 << endl;
             *it2 = 255;
         }
         else
