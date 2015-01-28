@@ -11,6 +11,7 @@ using namespace cv;
 void compareImages (Mat& img1, Mat& img2);
 void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
+void flattenImages (Mat& img1Gray, Mat& img2Gray);
 
 int main()
 {
@@ -64,6 +65,10 @@ int main()
 
     ///Compare the images without applying the filtering
     compareImages(img1, img2);
+
+    ///Flatten the grayscale images
+    flattenImages(img1Sobel, img2Sobel);
+
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
 
@@ -80,6 +85,7 @@ int main()
 
 }
 
+///This function takes four images and applies the Sobel filter to the first two, placing the results into the second 2.
 void sobelImages(Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel)
 {
     int scale = 1;
@@ -138,6 +144,7 @@ void sobelImages(Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel)
     return;
 }
 
+///This function iterates through two RGB images and changes any different pixels to green.
 void compareImages (Mat& img1, Mat& img2)
 {
 
@@ -166,6 +173,7 @@ void compareImages (Mat& img1, Mat& img2)
     return;
 }
 
+///This function iterates through two grayscale images and marks differences as white pixels and changes the rest black.
 void compareGrayImages(Mat& img1Gray, Mat& img2Gray)
 {
     MatIterator_<uchar> it1, end1, it2, end2;
@@ -179,6 +187,34 @@ void compareGrayImages(Mat& img1Gray, Mat& img2Gray)
         else
         {
             *it2 = 0;
+        }
+    }
+
+    return;
+}
+
+///This function takes two grayscale images and converts them to purely black and white, with no shades of gray in between.
+void flattenImages(Mat& img1Gray, Mat& img2Gray)
+{
+    MatIterator_<uchar> it1, end1, it2, end2;
+    for (it1 = img1Gray.begin<uchar>(), end1 = img1Gray.end<uchar>(), it2 = img2Gray.begin<uchar>(), end2 = img2Gray.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
+    {
+        if (*it1 < 127)
+        {
+            *it1 = 0;
+        }
+        else
+        {
+            *it1 = 255;
+        }
+
+        if (*it2 < 127)
+        {
+            *it2 = 0;
+        }
+        else
+        {
+            *it2 = 255;
         }
     }
 
