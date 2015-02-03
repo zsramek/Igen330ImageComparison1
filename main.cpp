@@ -9,6 +9,8 @@ using namespace cv;
 
 void compareImages (Mat& img1, Mat& img2);
 
+//TESTING
+
 int main()
 {
     Mat img1;
