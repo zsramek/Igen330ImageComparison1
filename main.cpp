@@ -20,10 +20,10 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/zefan/Documents/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/zefan/Documents/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
-    img1Sobel = imread("/home/zefan/Documents/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2Sobel = imread("/home/zefan/Documents/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
+    img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
     if(img1.empty())
     {
