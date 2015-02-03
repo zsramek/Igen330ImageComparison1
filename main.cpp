@@ -9,15 +9,13 @@ using namespace cv;
 
 void compareImages (Mat& img1, Mat& img2);
 
-//TESTING
-
 int main()
 {
     Mat img1;
     Mat img2;
 
-    img1 = imread("/home/zefan/Documents/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/zefan/Documents/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
     if(img1.empty())
     {
