@@ -12,6 +12,7 @@ void compareImages (Mat& img1, Mat& img2);
 void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
+void subtraction (Mat& compared, Mat& img1);
 
 int main()
 {
@@ -69,8 +70,15 @@ int main()
     ///Flatten the grayscale images
     flattenImages(img1Sobel, img2Sobel);
 
+    imshow("Perfect", img1Sobel);
+    imshow("Comparison", img2Sobel);
+
+    waitKey(0);
+
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
+
+    subtraction(img2Sobel, img1Sobel);
 
     ///Display the results
     imshow("Comparison", img2);
@@ -196,10 +204,14 @@ void compareGrayImages(Mat& img1Gray, Mat& img2Gray)
 ///This function takes two grayscale images and converts them to purely black and white, with no shades of gray in between.
 void flattenImages(Mat& img1Gray, Mat& img2Gray)
 {
+    ///Apply blur to reduce noise
+    GaussianBlur(img1Gray, img1Gray, Size(3,3), 0, 0, BORDER_DEFAULT);
+    GaussianBlur(img2Gray, img2Gray, Size(3,3), 0, 0, BORDER_DEFAULT);
+
     MatIterator_<uchar> it1, end1, it2, end2;
     for (it1 = img1Gray.begin<uchar>(), end1 = img1Gray.end<uchar>(), it2 = img2Gray.begin<uchar>(), end2 = img2Gray.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
     {
-        if (*it1 < 127)
+        if (*it1 < 10)
         {
             *it1 = 0;
         }
@@ -208,7 +220,7 @@ void flattenImages(Mat& img1Gray, Mat& img2Gray)
             *it1 = 255;
         }
 
-        if (*it2 < 127)
+        if (*it2 < 10)
         {
             *it2 = 0;
         }
@@ -221,5 +233,17 @@ void flattenImages(Mat& img1Gray, Mat& img2Gray)
     return;
 }
 
-
-
+///This function subtracts the original good file from the output of the comparison.
+void subtraction(Mat& compared, Mat& img1)
+{
+    MatIterator_<uchar> it1, end1, it2, end2;
+    for (it1 = compared.begin<uchar>(), end1 = compared.end<uchar>(), it2 = img1.begin<uchar>(), end2 = img1.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
+    {
+        *it1 = *it1 - *it2;
+        if (*it1 < 0)
+        {
+            *it1 = 0;
+        }
+    }
+    return;
+}
