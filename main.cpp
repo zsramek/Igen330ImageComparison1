@@ -45,6 +45,7 @@ int main()
 
     waitKey(0);
 
+    /*
     int i;
 
     do
@@ -54,6 +55,7 @@ int main()
         cin >> i;
     }
     while(i != 1);
+    */
 
     ///Apply the Sobel filering to both images
     sobelImages(img1, img2, img1Sobel, img2Sobel);
