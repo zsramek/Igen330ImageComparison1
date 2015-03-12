@@ -1,8 +1,10 @@
 # depslib dependency file v1.0
-1423519095 source:/home/zefan/Documents/CodeBlocksProjects/FirstImageComparison/main.cpp
+1426188626 source:/home/zefan/Documents/CodeBlocksProjects/FirstImageComparison/main.cpp
 	<iostream>
 	<stdio.h>
 	<stdlib.h>
+	<math.h>
+	<vector>
 	<opencv2/core/core.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<opencv2/imgproc/imgproc.hpp>

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -13,29 +15,35 @@ void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
 void subtraction (Mat& compared, Mat& img1);
+Mat alignImage (Mat& image);
 
 int main()
 {
     Mat img1;
     Mat img2;
+    Mat img1Orig;
+    Mat img2Orig;
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
-    img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1Orig = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
+    img2Orig = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
+    //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
+    //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
-    if(img1.empty())
+    if(img1Orig.empty())
     {
         cout << "Could not load image 1." << endl;
         return -1;
     }
-    else if (img2.empty())
+    else if (img2Orig.empty())
     {
         cout << "Could not load image 2." << endl;
         return -1;
     }
+
+    img1 = alignImage(img1Orig);
+    img2 = alignImage(img2Orig);
 
     namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
     namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
@@ -44,18 +52,6 @@ int main()
     imshow("Comparison", img2);
 
     waitKey(0);
-
-    /*
-    int i;
-
-    do
-    {
-        cout << "Enter a 1 to compare images" << endl;
-        i = 0;
-        cin >> i;
-    }
-    while(i != 1);
-    */
 
     ///Apply the Sobel filering to both images
     sobelImages(img1, img2, img1Sobel, img2Sobel);
@@ -80,6 +76,7 @@ int main()
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
 
+    ///Subtract the "Perfect flattened image from the
     subtraction(img2Sobel, img1Sobel);
 
     ///Display the results
@@ -179,7 +176,6 @@ void compareImages (Mat& img1, Mat& img2)
             (*it2)[2] = 0;
         }
     }
-
     return;
 }
 
@@ -248,4 +244,267 @@ void subtraction(Mat& compared, Mat& img1)
         }
     }
     return;
+}
+
+Mat alignImage(Mat& image)
+{
+    Mat imageGray;
+    namedWindow("Test", CV_WINDOW_AUTOSIZE);
+    imshow("Test", image);
+    waitKey(0);
+
+    ///Convert image to grayscale
+    cvtColor(image, imageGray, CV_RGB2GRAY);
+
+    ///Apply blur to smooth edges and use adapative thresholding -- CAUSES PROBLEMS!
+    cv::Size size(3,3);
+    cv::GaussianBlur(imageGray,imageGray,size,0);
+    //adaptiveThreshold(image, image,255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,75,10);
+    cv::bitwise_not(imageGray, imageGray);
+
+    imshow("Test", imageGray);
+    waitKey(0);
+
+
+    ///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ///Harris Corner Detection - http://docs.opencv.org/doc/tutorials/features2d/trackingmotion/harris_detector/harris_detector.html
+    ///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+    int thresh = 180;
+    //int max_thresh = 255;
+
+    Mat dst, dst_norm, dst_norm_scaled;
+    dst = Mat::zeros( image.size(), CV_32FC1 );
+
+    /// Detector parameters
+    int blockSize = 2;
+    int apertureSize = 3;
+    double k = 0.04;
+
+    /// Detecting corners
+    //cout << "Detecting Corners" << endl;
+    cornerHarris( imageGray, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+
+    /// Normalizing
+    normalize( dst, dst_norm, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+    convertScaleAbs( dst_norm, dst_norm_scaled );
+
+    ///Preparing the points for the warp
+
+    ///Declaring variables needed for sorting points
+    double centreX = (double)(image.cols/2);
+    double centreY = (double)(image.rows/2);
+    double D; ///Distance to centre
+
+    int pointsIndex = -1; ///Tracks the array index
+    int pts = 0; ///Tracks the number of points found
+
+    ///Arrays to hold the points and distances from the centre
+    Point2f allPoints[1000];
+    double distances[1000];
+
+    /// Drawing a circle around corners and placing all unique points in an array along with a
+    for( int j = 0; j < dst_norm.rows ; j++ )
+    {
+        for( int i = 0; i < dst_norm.cols; i++ )
+        {
+            if( (int) dst_norm.at<float>(j,i) > thresh )
+            {
+                ///Create a Point2f for the point
+                Point2f pt;
+                pt.x = i;
+                pt.y = j;
+
+                double x = (double)i;
+                double y = (double)j;
+
+                ///For debugging purposes
+                //cout << "pts: " << pts << endl;
+                //cout << "pointsIndex: " << pointsIndex << endl;
+
+                if (pts >= 1)
+                {
+                    if ((i > (allPoints[pointsIndex].x + 5) || i < (allPoints[pointsIndex].x - 5)) && (j > (allPoints[pointsIndex].y + 5) || j < (allPoints[pointsIndex].y - 5)))
+                    {
+                        ///Point is not a duplicate
+                        ///Increment count of points
+                        pts++;
+
+                        ///For debugging purposes
+                        //cout << "Adding: " << pt << endl;
+                        //cout << "The previous point" << allPoints[pointsIndex] << "\n" << endl;
+
+
+                        ///Calculate the distance from the centre
+                        D = sqrt(pow((centreX-x), 2) + pow((centreY-y),2));
+
+                        ///Add the point and its distance from the centre to two vectors
+                        int q = pts - 1;
+                        allPoints[q] = pt;
+                        distances[q] = D;
+
+                        circle( dst_norm_scaled, Point( i, j ), 5,  Scalar(0), 2, 8, 0 );
+
+                        //distances.push_back(D);
+                        pointsIndex++;
+                    }
+                    else
+                    {
+                        ///Point is a duplicate
+                        ///For debugging purposes
+                        //cout << "Skipping: " << pt << "\n" << endl;
+                    }
+                }
+                else
+                {
+                    ///The first point
+                    ///Increment count of points
+                    pts++;
+
+                    ///For debugging purposes
+                    //cout << "Adding: " << pt << endl;
+                    //cout << "The previous point" << allPoints[pointsIndex] << "\n" << endl;
+
+
+                    ///Calculate the distance from the centre
+                    D = sqrt(pow((centreX-x), 2) + pow((centreY-y),2));
+
+                    ///Add the point and its distance from the centre to two vectors
+                    int q = pts - 1;
+                    allPoints[q] = pt;
+                    distances[q] = D;
+                    circle( dst_norm_scaled, Point( i, j ), 5,  Scalar(0), 2, 8, 0 );
+                    //distances.push_back(D);
+                    pointsIndex++;
+                }
+
+                ///Circle the point
+                //circle( dst_norm_scaled, Point( i, j ), 5,  Scalar(0), 2, 8, 0 );
+            }
+        }
+    }
+
+    ///Circle the centre
+    //circle( dst_norm_scaled, Point( (image.cols/2), (image.rows/2) ), 5,  Scalar(100), 2, 8, 0 );
+
+    ///For debugging purposes
+    /*
+    cout << "The centre is: " << image.cols/2 << ", " << image.rows/2 << "\n" << endl;
+    for (int f = 0; f < pts; f++)
+    {
+        cout << "index: " << f << " point: " << allPoints[f] << " distance: " << distances[f] << endl;
+    }
+    */
+
+    ///Add all the points to a vector and print it (for debugging purposes)
+    /*
+    std::vector<cv::Point2f> pointsVector;
+    for (int p = 0; p < pts; p++)
+    {
+        pointsVector.push_back(allPoints[y]);
+    }
+    cout << pointsVector << endl;
+    */
+
+    ///Show the image with the corners circled
+    namedWindow("corners_window", CV_WINDOW_AUTOSIZE);
+    imshow("corners_window", dst_norm_scaled);
+    waitKey(0);
+
+    Point2f points[4];
+    int index = 0;
+    int count;
+    ///Determing, based on the distance from the centre, the four corners.
+    for (int p = 0; p < pts; p++)
+    {
+        count = 0;
+        for (int q = 0; q < pts; q++)
+        {
+            if (distances[q] > distances[p])
+            {
+                count++;
+            }
+        }
+
+        if (count <= 3)
+        {
+            ///For debugging purposes
+            //cout << "Adding:  " << allPoints[p] << "  with distance:  " << distances[p] << "\n" << endl;
+
+            ///Add the corner point into the array of corners
+            points[index] = allPoints[p];
+            index++;
+        }
+    }
+
+    ///For debugging purposes
+    //for (int h = 0; h < 4; h++)
+    //{
+    //  cout << points[h] << endl;
+    //}
+
+    ///Ordering the Points
+    Point2f topLeft;
+    Point2f topRight;
+    Point2f bottomLeft;
+    Point2f bottomRight;
+
+    for (int c = 0; c < 4; c++)
+    {
+        if (points[c].x < (image.cols/2) && points[c].y < (image.rows/2))
+        {
+            topLeft = points[c];
+        }
+        else if (points[c].x > (image.cols/2) && points[c].y < (image.rows/2))
+        {
+            topRight = points[c];
+        }
+        else if (points[c].x < (image.cols/2) && points[c].y > (image.rows/2))
+        {
+            bottomLeft = points[c];
+        }
+        else
+        {
+            bottomRight = points[c];
+        }
+    }
+
+    ///Printing the coords of the points (for debugging purposes)
+    /*
+    for (int u = 0; u < 4; u++)
+    {
+        cout << points[u].x << "   " << points[u].y << endl;
+    }
+    */
+
+    ///Create a vector with the ordered corners
+    std::vector<cv::Point2f> corners;
+    corners.push_back(topLeft);
+    corners.push_back(topRight);
+    corners.push_back(bottomRight);
+    corners.push_back(bottomLeft);
+
+    /// Define the destination image
+    cv::Mat quad = cv::Mat::zeros(600, 500, CV_8UC3);
+
+    /// Corners of the destination image
+    std::vector<cv::Point2f> quad_pts;
+    quad_pts.push_back(cv::Point2f(0, 0));
+    quad_pts.push_back(cv::Point2f(quad.cols, 0));
+    quad_pts.push_back(cv::Point2f(quad.cols, quad.rows));
+    quad_pts.push_back(cv::Point2f(0, quad.rows));
+
+    /// Get transformation matrix
+    cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
+
+    /// Apply perspective transformation
+    cv::warpPerspective(image, quad, transmtx, quad.size());
+    cv::imshow("Test", quad);
+
+    waitKey(0);
+
+    destroyAllWindows();
+
+    return image;
 }
