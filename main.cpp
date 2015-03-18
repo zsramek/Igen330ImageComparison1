@@ -15,7 +15,7 @@ void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
 void subtraction (Mat& compared, Mat& img1);
-Mat alignImage (Mat& image);
+void alignImage (Mat& image);
 
 int main()
 {
@@ -26,24 +26,24 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1Orig = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2Orig = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
     //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
     //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
-    if(img1Orig.empty())
+    if(img1.empty())
     {
         cout << "Could not load image 1." << endl;
         return -1;
     }
-    else if (img2Orig.empty())
+    else if (img2.empty())
     {
         cout << "Could not load image 2." << endl;
         return -1;
     }
 
-    img1 = alignImage(img1Orig);
-    img2 = alignImage(img2Orig);
+    alignImage(img1);
+    alignImage(img2);
 
     namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
     namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
@@ -246,7 +246,7 @@ void subtraction(Mat& compared, Mat& img1)
     return;
 }
 
-Mat alignImage(Mat& image)
+void alignImage(Mat& image)
 {
     Mat imageGray;
     namedWindow("Test", CV_WINDOW_AUTOSIZE);
@@ -504,7 +504,7 @@ Mat alignImage(Mat& image)
 
     waitKey(0);
 
-    destroyAllWindows();
+    image = quad;
 
-    return image;
+    destroyAllWindows();
 }
