@@ -45,33 +45,33 @@ int main()
     alignImage(img1);
     alignImage(img2);
 
-    namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
-    namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
+    //namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
+    //namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
 
-    imshow("Perfect", img1);
-    imshow("Comparison", img2);
+    //imshow("Perfect", img1);
+    //imshow("Comparison", img2);
 
-    waitKey(0);
+    //waitKey(0);
 
     ///Apply the Sobel filering to both images
     sobelImages(img1, img2, img1Sobel, img2Sobel);
 
     ///Show the results of the sobel filtering
-    imshow("Perfect", img1Sobel);
-    imshow("Comparison", img2Sobel);
+    //imshow("Perfect", img1Sobel);
+    //imshow("Comparison", img2Sobel);
 
-    waitKey(0);
+    //waitKey(0);
 
     ///Compare the images without applying the filtering
-    compareImages(img1, img2);
+    //compareImages(img1, img2);
 
     ///Flatten the grayscale images
     flattenImages(img1Sobel, img2Sobel);
 
-    imshow("Perfect", img1Sobel);
-    imshow("Comparison", img2Sobel);
+    //imshow("Perfect", img1Sobel);
+    //imshow("Comparison", img2Sobel);
 
-    waitKey(0);
+    //waitKey(0);
 
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
@@ -80,11 +80,11 @@ int main()
     subtraction(img2Sobel, img1Sobel);
 
     ///Display the results
-    imshow("Comparison", img2);
+    //imshow("Comparison", img2);
     namedWindow("Sobel Comparison", CV_WINDOW_AUTOSIZE);
     imshow("Sobel Comparison", img2Sobel);
 
-    waitKey(0);
+    waitKey(2000);
 
     destroyAllWindows();
 
@@ -249,9 +249,9 @@ void subtraction(Mat& compared, Mat& img1)
 void alignImage(Mat& image)
 {
     Mat imageGray;
-    namedWindow("Test", CV_WINDOW_AUTOSIZE);
-    imshow("Test", image);
-    waitKey(0);
+    //namedWindow("Test", CV_WINDOW_AUTOSIZE);
+    //imshow("Test", image);
+    //waitKey(0);
 
     ///Convert image to grayscale
     cvtColor(image, imageGray, CV_RGB2GRAY);
@@ -262,8 +262,8 @@ void alignImage(Mat& image)
     //adaptiveThreshold(image, image,255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,75,10);
     cv::bitwise_not(imageGray, imageGray);
 
-    imshow("Test", imageGray);
-    waitKey(0);
+    //imshow("Test", imageGray);
+    //waitKey(0);
 
 
     ///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -408,9 +408,9 @@ void alignImage(Mat& image)
     */
 
     ///Show the image with the corners circled
-    namedWindow("corners_window", CV_WINDOW_AUTOSIZE);
-    imshow("corners_window", dst_norm_scaled);
-    waitKey(0);
+    //namedWindow("corners_window", CV_WINDOW_AUTOSIZE);
+    //imshow("corners_window", dst_norm_scaled);
+    //waitKey(0);
 
     Point2f points[4];
     int index = 0;
@@ -500,9 +500,9 @@ void alignImage(Mat& image)
 
     /// Apply perspective transformation
     cv::warpPerspective(image, quad, transmtx, quad.size());
-    cv::imshow("Test", quad);
+    //cv::imshow("Test", quad);
 
-    waitKey(0);
+    //waitKey(0);
 
     image = quad;
 
