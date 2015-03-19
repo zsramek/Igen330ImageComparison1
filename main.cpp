@@ -26,20 +26,23 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
+    ///DANGER: the program now deletes test9.png upon completion.
     img1 = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
     img2 = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
     //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
     //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
-    if(img1.empty())
+    while(img1.empty())
     {
-        cout << "Could not load image 1." << endl;
-        return -1;
+        //cout << "Could not load image 1." << endl;
+        img1 = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
+        //return -1;
     }
-    else if (img2.empty())
+    while (img2.empty())
     {
-        cout << "Could not load image 2." << endl;
-        return -1;
+        //cout << "Could not load image 2." << endl;
+        img2 = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
+        //return -1;
     }
 
     alignImage(img1);
@@ -87,6 +90,9 @@ int main()
     waitKey(2000);
 
     destroyAllWindows();
+
+    ///DANGER
+    remove("/home/toTest/test9.png");
 
     return 0;
 
