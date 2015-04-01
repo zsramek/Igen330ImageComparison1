@@ -26,8 +26,8 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/toTest/test9.png", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test10.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/test52.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
     //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
     //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
@@ -41,6 +41,9 @@ int main()
         cout << "Could not load image 2." << endl;
         return -1;
     }
+
+    resize(img1, img1, Size(), 0.2, 0.2, CV_INTER_AREA);
+    resize(img2, img2, Size(), 0.2, 0.2, CV_INTER_AREA);
 
     alignImage(img1);
     alignImage(img2);
@@ -63,7 +66,7 @@ int main()
     waitKey(0);
 
     ///Compare the images without applying the filtering
-    compareImages(img1, img2);
+    //compareImages(img1, img2);
 
     ///Flatten the grayscale images
     flattenImages(img1Sobel, img2Sobel);
@@ -259,7 +262,8 @@ void alignImage(Mat& image)
     ///Apply blur to smooth edges and use adapative thresholding -- CAUSES PROBLEMS!
     cv::Size size(3,3);
     cv::GaussianBlur(imageGray,imageGray,size,0);
-    //adaptiveThreshold(image, image,255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,75,10);
+    //adaptiveThreshold(imageGray, imageGray,255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,75,10);
+    //cv::threshold(imageGray,imageGray, 100, 255, CV_THRESH_TOZERO); //- See more at: http://en.efreedom.net/Question/1-7263621/Find-Corners-Image-Using-OpenCv#sthash.fHgOd4bq.dpuf
     cv::bitwise_not(imageGray, imageGray);
 
     imshow("Test", imageGray);
