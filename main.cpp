@@ -15,6 +15,7 @@ void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
 void subtraction (Mat& compared, Mat& img1);
+void correctPixelShift(Mat& img1, Mat& result);
 void alignImage (Mat& image);
 
 int main()
@@ -26,8 +27,8 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/toTest/test52.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test54.JPG", CV_LOAD_IMAGE_UNCHANGED);
     //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
     //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
@@ -79,11 +80,14 @@ int main()
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
 
-    ///Subtract the "Perfect flattened image from the
+    ///Subtract the "Perfect" flattened image from the result of comparison
     subtraction(img2Sobel, img1Sobel);
 
+    ///Pixel Shift Correction
+    correctPixelShift(img1Sobel, img2Sobel);
+
     ///Display the results
-    imshow("Comparison", img2);
+    //imshow("Comparison", img2);
     namedWindow("Sobel Comparison", CV_WINDOW_AUTOSIZE);
     imshow("Sobel Comparison", img2Sobel);
 
@@ -247,6 +251,31 @@ void subtraction(Mat& compared, Mat& img1)
         }
     }
     return;
+}
+
+void correctPixelShift(Mat& img2, Mat& result)
+{
+    MatIterator_<uchar> it1, end1, it2, end2;
+    for (it1 = result.begin<uchar>(), end1 = result.end<uchar>(), it2 = img2.begin<uchar>(), end2 = img2.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
+    {
+        if (*it1 > 0)
+        {
+            /// w defines the "radius" of the "circle" examined around each pixel - can be tuned
+            for (int w = 0; w < 50; w++)
+            {
+                if (*(it2-w) > 0 || *(it2+w) > 0)
+                {
+                    *it1 = 0;
+                }
+
+                if (*(it2-(750+w)) > 0 || *(it2+(750+w)) > 0)
+                {
+                    *it1 = 0;
+                }
+            }
+
+        }
+    }
 }
 
 void alignImage(Mat& image)
