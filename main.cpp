@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
 
 using namespace std;
 using namespace cv;
@@ -15,7 +16,7 @@ void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
 void subtraction (Mat& compared, Mat& img1);
-void correctPixelShift(Mat& img1, Mat& result);
+void detectBlobs(Mat& img2, Mat& result);
 void alignImage (Mat& image);
 
 int main()
@@ -27,10 +28,8 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/toTest/test59.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test60.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
-    //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test56.JPG", CV_LOAD_IMAGE_UNCHANGED);
 
     if(img1.empty())
     {
@@ -43,11 +42,16 @@ int main()
         return -1;
     }
 
+    ///Resize both images
     resize(img1, img1, Size(), 0.2, 0.2, CV_INTER_AREA);
     resize(img2, img2, Size(), 0.2, 0.2, CV_INTER_AREA);
 
+    ///Align and crop both images
     alignImage(img1);
     alignImage(img2);
+
+    ///Create a copy of img2 for final display
+    Mat displayImage = img2;
 
     namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
     namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
@@ -85,10 +89,10 @@ int main()
 
     namedWindow("Post Subtraction", CV_WINDOW_AUTOSIZE);
     imshow("Post Subtraction", img2Sobel);
+    waitKey(0);
 
-    ///Pixel Shift Correction
-    correctPixelShift(img1Sobel, img2Sobel);
-    //correctPixelShift(img1Sobel, img2Sobel);
+    ///Detect errors as blobs
+    detectBlobs(displayImage, img2Sobel);
 
     ///Display the results
     //imshow("Comparison", img2);
@@ -100,7 +104,6 @@ int main()
     destroyAllWindows();
 
     return 0;
-
 }
 
 ///This function takes four images and applies the Sobel filter to the first two, placing the results into the second 2.
@@ -257,44 +260,55 @@ void subtraction(Mat& compared, Mat& img1)
     return;
 }
 
-
-///This function checks any pixels identified as errors and looks nearby in the "good" image for pixels nearby
-void correctPixelShift(Mat& img2, Mat& result)
+///This function attempts to identify true errors by looking for blobs
+void detectBlobs(Mat& img2, Mat& result)
 {
-    int badPixelCount;
+    ///Setup the blob detector
+    // Setup SimpleBlobDetector parameters.
+    SimpleBlobDetector::Params params;
 
-    MatIterator_<uchar> it1, end1, it2, end2;
-    for (it1 = result.begin<uchar>(), end1 = result.end<uchar>(), it2 = img2.begin<uchar>(), end2 = img2.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
+    /// Change thresholds
+    params.minThreshold = 10;
+    params.maxThreshold = 200;
+
+    /// Filter by Area.
+    params.filterByArea = true;
+    params.minArea = 100;
+
+    ///Turn off extra parameters
+    params.filterByCircularity = false;
+    params.filterByConvexity = false;
+    params.filterByInertia = false;
+
+    ///Declare the blob detector
+    SimpleBlobDetector detector(params);
+
+    ///Create a vector for the blob keypoints
+    std::vector<KeyPoint> keypoints;
+
+    ///Detect blobs
+    detector.detect(result, keypoints);
+
+    ///Draw circles around the keypoints of the blobs
+    drawKeypoints(img2, keypoints, img2, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+    ///List the keypoint coordinates - for debugging purposes
+    /*
+    for (int p = 0; p < keypoints.size(); p++)
     {
-        if (*it1 > 0)
-        {
-            badPixelCount = 0;
-
-            /// w defines the "radius" of the "circle" examined around each pixel - can be tuned
-            for (int w = 0; w < 50; w++)
-            {
-                if (*(it1-w) > 0 || *(it1+w) > 0)
-                {
-                    //*it1 = 255;
-                    badPixelCount++;
-                }
-
-                if (*(it1-(750+w)) > 0 || *(it1+(750+w)) > 0)
-                {
-                    //*it1 = 255;
-                    badPixelCount++;
-                }
-            }
-
-            if (badPixelCount < 50)
-            {
-                *it1 = 0;
-            }
-
-        }
+        cout << "keypoint: " << keypoints[p].pt.x << ", " << keypoints[p].pt.y << endl;
     }
+    */
+
+    ///Show the original image with the errors circled
+    namedWindow("BLOB", CV_WINDOW_AUTOSIZE);
+    imshow("BLOB", img2);
+    waitKey(0);
+
+    return;
 }
 
+///This function takes an image, detects the corners of the largest rectangle and crops/rotates the image to be just that rectangle
 void alignImage(Mat& image)
 {
     Mat imageGray;
@@ -557,4 +571,6 @@ void alignImage(Mat& image)
     image = quad;
 
     destroyAllWindows();
+
+    return;
 }
