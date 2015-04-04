@@ -21,16 +21,20 @@ void alignImage (Mat& image);
 
 int main()
 {
+    ///Declare image matrices
     Mat img1;
     Mat img2;
     Mat img1Orig;
     Mat img2Orig;
     Mat img1Sobel;
     Mat img2Sobel;
+    Mat displayImage;
 
+    ///Open input images
     img1 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
     img2 = imread("/home/toTest/test56.JPG", CV_LOAD_IMAGE_UNCHANGED);
 
+    ///Check if images opened correctly
     if(img1.empty())
     {
         cout << "Could not load image 1." << endl;
@@ -51,7 +55,7 @@ int main()
     alignImage(img2);
 
     ///Create a copy of img2 for final display
-    Mat displayImage = img2;
+    displayImage = img2;
 
     namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
     namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
