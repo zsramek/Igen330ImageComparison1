@@ -27,8 +27,8 @@ int main()
     Mat img1Sobel;
     Mat img2Sobel;
 
-    img1 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test54.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/test59.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/test60.JPG", CV_LOAD_IMAGE_UNCHANGED);
     //img1Sobel = imread("/home/toTest/blank.png", CV_LOAD_IMAGE_UNCHANGED);
     //img2Sobel = imread("/home/toTest/test.png", CV_LOAD_IMAGE_UNCHANGED);
 
@@ -83,8 +83,12 @@ int main()
     ///Subtract the "Perfect" flattened image from the result of comparison
     subtraction(img2Sobel, img1Sobel);
 
+    namedWindow("Post Subtraction", CV_WINDOW_AUTOSIZE);
+    imshow("Post Subtraction", img2Sobel);
+
     ///Pixel Shift Correction
     correctPixelShift(img1Sobel, img2Sobel);
+    //correctPixelShift(img1Sobel, img2Sobel);
 
     ///Display the results
     //imshow("Comparison", img2);
@@ -253,25 +257,38 @@ void subtraction(Mat& compared, Mat& img1)
     return;
 }
 
+
+///This function checks any pixels identified as errors and looks nearby in the "good" image for pixels nearby
 void correctPixelShift(Mat& img2, Mat& result)
 {
+    int badPixelCount;
+
     MatIterator_<uchar> it1, end1, it2, end2;
     for (it1 = result.begin<uchar>(), end1 = result.end<uchar>(), it2 = img2.begin<uchar>(), end2 = img2.end<uchar>(); it1!=end1, it2!=end2; ++it1, ++it2)
     {
         if (*it1 > 0)
         {
+            badPixelCount = 0;
+
             /// w defines the "radius" of the "circle" examined around each pixel - can be tuned
             for (int w = 0; w < 50; w++)
             {
-                if (*(it2-w) > 0 || *(it2+w) > 0)
+                if (*(it1-w) > 0 || *(it1+w) > 0)
                 {
-                    *it1 = 0;
+                    //*it1 = 255;
+                    badPixelCount++;
                 }
 
-                if (*(it2-(750+w)) > 0 || *(it2+(750+w)) > 0)
+                if (*(it1-(750+w)) > 0 || *(it1+(750+w)) > 0)
                 {
-                    *it1 = 0;
+                    //*it1 = 255;
+                    badPixelCount++;
                 }
+            }
+
+            if (badPixelCount < 50)
+            {
+                *it1 = 0;
             }
 
         }
