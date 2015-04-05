@@ -267,6 +267,8 @@ void subtraction(Mat& compared, Mat& img1)
 ///This function attempts to identify true errors by looking for blobs
 void detectBlobs(Mat& img2, Mat& result)
 {
+    ///http://www.learnopencv.com/blob-detection-using-opencv-python-c/
+
     ///Setup the blob detector
     // Setup SimpleBlobDetector parameters.
     SimpleBlobDetector::Params params;
