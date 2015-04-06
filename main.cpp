@@ -19,7 +19,7 @@ void subtraction (Mat& compared, Mat& img1);
 void detectBlobs(Mat& img2, Mat& result, int blobColour);
 void alignImage (Mat& image);
 
-int main()
+int main(int argc, char *argv[])
 {
     ///Declare image matrices
     Mat img1;
@@ -32,9 +32,12 @@ int main()
     Mat lightBlobImg;
     Mat displayImage;
 
+    char* master = argv[1];
+    char* test = argv[2];
+
     ///Open input images
-    img1 = imread("/home/toTest/NewTests/master1.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/NewTests/test2.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread(master, CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread(test, CV_LOAD_IMAGE_UNCHANGED);
 
     ///Check if images opened correctly
     if(img1.empty())
@@ -42,10 +45,9 @@ int main()
         cout << "Could not load image 1." << endl;
         return -1;
     }
-    else if (img2.empty())
+    while (img2.empty())
     {
-        cout << "Could not load image 2." << endl;
-        return -1;
+        img2 = imread(test, CV_LOAD_IMAGE_UNCHANGED);
     }
 
     ///Resize both images
@@ -61,11 +63,11 @@ int main()
     darkBlobImg = img2;
     lightBlobImg = img2;
 
-    namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
-    namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
+    namedWindow("Master", CV_WINDOW_AUTOSIZE);
+    namedWindow("Test", CV_WINDOW_AUTOSIZE);
 
-    imshow("Perfect", img1);
-    imshow("Comparison", img2);
+    imshow("Master", img1);
+    imshow("Test", img2);
 
     waitKey(0);
 
@@ -73,8 +75,8 @@ int main()
     sobelImages(img1, img2, img1Sobel, img2Sobel);
 
     ///Show the results of the sobel filtering
-    imshow("Perfect", img1Sobel);
-    imshow("Comparison", img2Sobel);
+    imshow("Master", img1Sobel);
+    imshow("Test", img2Sobel);
 
     waitKey(0);
 
@@ -84,9 +86,8 @@ int main()
     ///Flatten the grayscale images
     flattenImages(img1Sobel, img2Sobel);
 
-    imshow("Perfect", img1Sobel);
-    imshow("Comparison", img2Sobel);
-
+    imshow("Master", img1Sobel);
+    imshow("Test", img2Sobel);
     waitKey(0);
 
     ///Compare the images after having applied the Sobel filtering
@@ -95,6 +96,7 @@ int main()
     ///Subtract the "Perfect" flattened image from the result of comparison
     subtraction(img2Sobel, img1Sobel);
 
+    destroyAllWindows();
     namedWindow("Post Subtraction", CV_WINDOW_AUTOSIZE);
     imshow("Post Subtraction", img2Sobel);
     waitKey(0);
@@ -109,13 +111,15 @@ int main()
     //add(darkBlobImg, lightBlobImg, displayImage);
 
     ///Display the results
-    //imshow("Comparison", img2);
-    namedWindow("Sobel Comparison", CV_WINDOW_AUTOSIZE);
-    imshow("Sobel Comparison", lightBlobImg);
+    destroyAllWindows();
+    namedWindow("Results", CV_WINDOW_AUTOSIZE);
+    imshow("Results", lightBlobImg);
 
     waitKey(0);
 
     destroyAllWindows();
+
+    remove(test);
 
     return 0;
 }
@@ -329,11 +333,6 @@ void detectBlobs(Mat& img2, Mat& result, int blobColour)
     }
     */
 
-    ///Show the original image with the errors circled
-    //namedWindow("BLOB", CV_WINDOW_AUTOSIZE);
-    //imshow("BLOB", img2);
-    //waitKey(0);
-
     return;
 }
 
@@ -341,8 +340,8 @@ void detectBlobs(Mat& img2, Mat& result, int blobColour)
 void alignImage(Mat& image)
 {
     Mat imageGray;
-    namedWindow("Test", CV_WINDOW_AUTOSIZE);
-    imshow("Test", image);
+    namedWindow("Alignment", CV_WINDOW_AUTOSIZE);
+    imshow("Alignment", image);
     waitKey(0);
 
     ///Convert image to grayscale
@@ -355,7 +354,7 @@ void alignImage(Mat& image)
     //cv::threshold(imageGray,imageGray, 100, 255, CV_THRESH_TOZERO); //- See more at: http://en.efreedom.net/Question/1-7263621/Find-Corners-Image-Using-OpenCv#sthash.fHgOd4bq.dpuf
     cv::bitwise_not(imageGray, imageGray);
 
-    imshow("Test", imageGray);
+    imshow("Alignnment", imageGray);
     waitKey(0);
 
 
@@ -501,8 +500,8 @@ void alignImage(Mat& image)
     */
 
     ///Show the image with the corners circled
-    namedWindow("corners_window", CV_WINDOW_AUTOSIZE);
-    imshow("corners_window", dst_norm_scaled);
+    namedWindow("Corners Detected", CV_WINDOW_AUTOSIZE);
+    imshow("Corners Detected", dst_norm_scaled);
     waitKey(0);
 
     Point2f points[4];
@@ -593,7 +592,7 @@ void alignImage(Mat& image)
 
     /// Apply perspective transformation
     cv::warpPerspective(image, quad, transmtx, quad.size());
-    cv::imshow("Test", quad);
+    cv::imshow("Alignement", quad);
 
     waitKey(0);
 
