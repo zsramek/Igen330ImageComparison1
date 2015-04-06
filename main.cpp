@@ -16,7 +16,7 @@ void compareGrayImages (Mat& img1Gray, Mat& img2Gray);
 void sobelImages (Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel);
 void flattenImages (Mat& img1Gray, Mat& img2Gray);
 void subtraction (Mat& compared, Mat& img1);
-void detectBlobs(Mat& img2, Mat& result);
+void detectBlobs(Mat& img2, Mat& result, int blobColour);
 void alignImage (Mat& image);
 
 int main()
@@ -28,11 +28,13 @@ int main()
     Mat img2Orig;
     Mat img1Sobel;
     Mat img2Sobel;
+    Mat darkBlobImg;
+    Mat lightBlobImg;
     Mat displayImage;
 
     ///Open input images
-    img1 = imread("/home/toTest/test48.JPG", CV_LOAD_IMAGE_UNCHANGED);
-    img2 = imread("/home/toTest/test56.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img1 = imread("/home/toTest/NewTests/master1.JPG", CV_LOAD_IMAGE_UNCHANGED);
+    img2 = imread("/home/toTest/NewTests/test2.JPG", CV_LOAD_IMAGE_UNCHANGED);
 
     ///Check if images opened correctly
     if(img1.empty())
@@ -55,7 +57,9 @@ int main()
     alignImage(img2);
 
     ///Create a copy of img2 for final display
-    displayImage = img2;
+    //displayImage = img2;
+    darkBlobImg = img2;
+    lightBlobImg = img2;
 
     namedWindow("Perfect", CV_WINDOW_AUTOSIZE);
     namedWindow("Comparison", CV_WINDOW_AUTOSIZE);
@@ -96,12 +100,18 @@ int main()
     waitKey(0);
 
     ///Detect errors as blobs
-    detectBlobs(displayImage, img2Sobel);
+    int blobColour;
+    blobColour = 0; ///Detect dark blobs
+    detectBlobs(darkBlobImg, img2Sobel, blobColour);
+    blobColour = 1; ///Detect light blobs
+    detectBlobs(lightBlobImg, img2Sobel, blobColour);
+
+    //add(darkBlobImg, lightBlobImg, displayImage);
 
     ///Display the results
     //imshow("Comparison", img2);
     namedWindow("Sobel Comparison", CV_WINDOW_AUTOSIZE);
-    imshow("Sobel Comparison", img2Sobel);
+    imshow("Sobel Comparison", lightBlobImg);
 
     waitKey(0);
 
@@ -265,7 +275,7 @@ void subtraction(Mat& compared, Mat& img1)
 }
 
 ///This function attempts to identify true errors by looking for blobs
-void detectBlobs(Mat& img2, Mat& result)
+void detectBlobs(Mat& img2, Mat& result, int blobColour)
 {
     ///http://www.learnopencv.com/blob-detection-using-opencv-python-c/
 
@@ -275,14 +285,27 @@ void detectBlobs(Mat& img2, Mat& result)
 
     /// Change thresholds
     params.minThreshold = 10;
+    //params.thresholdStep = 10;
     params.maxThreshold = 200;
 
     /// Filter by Area.
     params.filterByArea = true;
-    params.minArea = 100;
+    params.minArea = 50;
+
+    ///Filter by Colour
+    params.filterByColor = true;
+    if (blobColour == 0)
+    {
+        params.blobColor = 0;
+    }
+    else
+    {
+        params.blobColor = 255;
+    }
 
     ///Turn off extra parameters
-    params.filterByCircularity = false;
+    params.filterByCircularity = true;
+    params.minCircularity = 0.1;
     params.filterByConvexity = false;
     params.filterByInertia = false;
 
@@ -307,9 +330,9 @@ void detectBlobs(Mat& img2, Mat& result)
     */
 
     ///Show the original image with the errors circled
-    namedWindow("BLOB", CV_WINDOW_AUTOSIZE);
-    imshow("BLOB", img2);
-    waitKey(0);
+    //namedWindow("BLOB", CV_WINDOW_AUTOSIZE);
+    //imshow("BLOB", img2);
+    //waitKey(0);
 
     return;
 }
