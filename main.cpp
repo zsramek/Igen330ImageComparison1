@@ -71,19 +71,19 @@ int main(int argc, char *argv[])
     namedWindow("Master", CV_WINDOW_AUTOSIZE);
     namedWindow("Test", CV_WINDOW_AUTOSIZE);
 
-    imshow("Master", img1);
-    imshow("Test", img2);
+    //imshow("Master", img1);
+    //imshow("Test", img2);
 
-    waitKey(0);
+    //waitKey(0);
 
     ///Apply the Sobel filering to both images
     sobelImages(img1, img2, img1Sobel, img2Sobel);
 
     ///Show the results of the sobel filtering
-    imshow("Master", img1Sobel);
-    imshow("Test", img2Sobel);
+    //imshow("Master", img1Sobel);
+    //imshow("Test", img2Sobel);
 
-    waitKey(0);
+    //waitKey(0);
 
     ///Compare the images without applying the filtering
     //compareImages(img1, img2);
@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
     ///Flatten the grayscale images
     flattenImages(img1Sobel, img2Sobel);
 
-    imshow("Master", img1Sobel);
-    imshow("Test", img2Sobel);
-    waitKey(0);
+    //imshow("Master", img1Sobel);
+    //imshow("Test", img2Sobel);
+    //waitKey(0);
 
     ///Compare the images after having applied the Sobel filtering
     compareGrayImages(img1Sobel, img2Sobel);
@@ -102,9 +102,9 @@ int main(int argc, char *argv[])
     subtraction(img2Sobel, img1Sobel);
 
     destroyAllWindows();
-    namedWindow("Post Subtraction", CV_WINDOW_AUTOSIZE);
-    imshow("Post Subtraction", img2Sobel);
-    waitKey(0);
+    //namedWindow("Post Subtraction", CV_WINDOW_AUTOSIZE);
+    //imshow("Post Subtraction", img2Sobel);
+    //waitKey(0);
 
     ///Detect errors as blobs
     int blobColour;
@@ -333,8 +333,8 @@ void alignImage(Mat& image)
 {
     Mat imageGray;
     namedWindow("Alignment", CV_WINDOW_AUTOSIZE);
-    imshow("Alignment", image);
-    waitKey(0);
+    //imshow("Alignment", image);
+    //waitKey(0);
 
     ///Convert image to grayscale
     cvtColor(image, imageGray, CV_RGB2GRAY);
@@ -344,8 +344,8 @@ void alignImage(Mat& image)
     GaussianBlur(imageGray,imageGray,size,0);
     bitwise_not(imageGray, imageGray);
 
-    imshow("Alignnment", imageGray);
-    waitKey(0);
+    //imshow("Alignnment", imageGray);
+   // waitKey(0);
 
     int thresh = 180;
     //int max_thresh = 255;
@@ -485,8 +485,8 @@ void alignImage(Mat& image)
 
     ///Show the image with the corners circled
     namedWindow("Corners Detected", CV_WINDOW_AUTOSIZE);
-    imshow("Corners Detected", dst_norm_scaled);
-    waitKey(0);
+    //imshow("Corners Detected", dst_norm_scaled);
+    //waitKey(0);
 
     Point2f points[4];
     int index = 0;
@@ -576,9 +576,9 @@ void alignImage(Mat& image)
 
     /// Apply perspective transformation
     warpPerspective(image, quad, transmtx, quad.size());
-    imshow("Alignement", quad);
+   // imshow("Alignement", quad);
 
-    waitKey(0);
+    //waitKey(0);
 
     image = quad;
 
