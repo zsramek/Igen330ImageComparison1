@@ -1,3 +1,8 @@
+///QuaLa Error Detection Software
+///Written by Zefan Sramek
+///Contributions by Jasmin Liang, Rahim Moosa
+///2014/2015
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -186,17 +191,6 @@ void sobelImages(Mat& img1, Mat& img2, Mat& img1Sobel, Mat& img2Sobel)
 ///This function iterates through two RGB images and changes any different pixels to green.
 void compareImages (Mat& img1, Mat& img2)
 {
-
-    /*
-    Mat img1Final;
-    Mat img2Final;
-
-    cvtColor(img1, img1Final, CV_GRAY2RGB);
-    cvtColor(img2, img2Final, CV_GRAY2RGB);
-    */
-
-    //const int channels = img2.channels();
-
     MatIterator_<Vec3b> it1, end1, it2, end2;
     for (it1 = img1.begin<Vec3b>(), end1 = img1.end<Vec3b>(), it2 = img2.begin<Vec3b>(), end2 = img2.end<Vec3b>(); it1!=end1, it2!=end2; ++it1, ++it2)
     {
@@ -281,8 +275,6 @@ void subtraction(Mat& compared, Mat& img1)
 ///This function attempts to identify true errors by looking for blobs
 void detectBlobs(Mat& img2, Mat& result, int blobColour)
 {
-    ///http://www.learnopencv.com/blob-detection-using-opencv-python-c/
-
     ///Setup the blob detector
     // Setup SimpleBlobDetector parameters.
     SimpleBlobDetector::Params params;
@@ -347,21 +339,13 @@ void alignImage(Mat& image)
     ///Convert image to grayscale
     cvtColor(image, imageGray, CV_RGB2GRAY);
 
-    ///Apply blur to smooth edges and use adapative thresholding -- CAUSES PROBLEMS!
-    cv::Size size(3,3);
-    cv::GaussianBlur(imageGray,imageGray,size,0);
-    //adaptiveThreshold(imageGray, imageGray,255,CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY,75,10);
-    //cv::threshold(imageGray,imageGray, 100, 255, CV_THRESH_TOZERO); //- See more at: http://en.efreedom.net/Question/1-7263621/Find-Corners-Image-Using-OpenCv#sthash.fHgOd4bq.dpuf
-    cv::bitwise_not(imageGray, imageGray);
+    ///Apply blur to smooth edges
+    Size size(3,3);
+    GaussianBlur(imageGray,imageGray,size,0);
+    bitwise_not(imageGray, imageGray);
 
     imshow("Alignnment", imageGray);
     waitKey(0);
-
-
-    ///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ///Harris Corner Detection - http://docs.opencv.org/doc/tutorials/features2d/trackingmotion/harris_detector/harris_detector.html
-    ///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 
     int thresh = 180;
     //int max_thresh = 255;
@@ -578,7 +562,7 @@ void alignImage(Mat& image)
     corners.push_back(bottomLeft);
 
     /// Define the destination image
-    cv::Mat quad = cv::Mat::zeros(600, 500, CV_8UC3);
+    Mat quad = cv::Mat::zeros(600, 500, CV_8UC3);
 
     /// Corners of the destination image
     std::vector<cv::Point2f> quad_pts;
@@ -588,11 +572,11 @@ void alignImage(Mat& image)
     quad_pts.push_back(cv::Point2f(0, quad.rows));
 
     /// Get transformation matrix
-    cv::Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
+    Mat transmtx = cv::getPerspectiveTransform(corners, quad_pts);
 
     /// Apply perspective transformation
-    cv::warpPerspective(image, quad, transmtx, quad.size());
-    cv::imshow("Alignement", quad);
+    warpPerspective(image, quad, transmtx, quad.size());
+    imshow("Alignement", quad);
 
     waitKey(0);
 
